@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Passes · DancePass{% endblock %}
+
+{% block content %}
+  <section class="card">
+    <header class="card-head">
+      <h2>Pass types</h2>
+      <div class="actions">
+        <a class="btn btn-primary" href="{{ url_for('pass_type_new') }}">+ New pass type</a>
+      </div>
+    </header>
+
+    {% if pass_types %}
+      <table class="table">
+        <thead><tr><th>Name</th><th>Kind</th><th>Classes</th><th>Valid for</th><th>Price</th><th>Status</th><th></th></tr></thead>
+        <tbody>
+          {% for pt in pass_types %}
+            <tr {% if not pt.active %}class="dim"{% endif %}>
+              <td>{{ pt.name }}</td>
+              <td><span class="chip">{{ pt.kind }}</span></td>
+              <td>{{ pt.punches if pt.kind == 'punch' else 'Unlimited' }}</td>
+              <td>{{ pt.valid_days ~ ' days' if pt.valid_days else 'No expiry' }}</td>
+              <td>{{ pt.price_cents | money }}</td>
+              <td>{{ 'Active' if pt.active else 'Inactive' }}</td>
+              <td>
+                <form method="post" action="{{ url_for('pass_type_toggle', pass_type_id=pt.id) }}">
+                  <button class="btn btn-sm" type="submit">{{ 'Deactivate' if pt.active else 'Activate' }}</button>
+                </form>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p class="muted">No pass types yet.</p>
+    {% endif %}
+  </section>
+{% endblock %}

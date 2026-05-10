@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}{{ action }} · DancePass{% endblock %}
+
+{% block content %}
+  <section class="card">
+    <header class="card-head"><h2>{{ action }}</h2></header>
+    <form method="post" class="form">
+      <label>Name *<input name="name" value="{{ pt.name or '' }}" required placeholder="10-Class Pass"></label>
+      <div class="row">
+        <label>Kind
+          <select name="kind">
+            <option value="punch" {% if (pt.kind or 'punch') == 'punch' %}selected{% endif %}>Punch card (N classes)</option>
+            <option value="membership" {% if pt.kind == 'membership' %}selected{% endif %}>Membership (unlimited)</option>
+          </select>
+        </label>
+        <label>Classes (punch only)<input type="number" name="punches" min="1" value="{{ pt.punches or '' }}"></label>
+        <label>Valid for (days)<input type="number" name="valid_days" min="1" value="{{ pt.valid_days or '' }}" placeholder="e.g. 30"></label>
+      </div>
+      <div class="row">
+        <label>Price (USD)<input type="number" step="0.01" min="0" name="price" value="{{ '%.2f' % (pt.price_cents/100) if pt.price_cents else '' }}"></label>
+        <label class="check">
+          <input type="checkbox" name="active" {% if pt.active %}checked{% endif %}> Active
+        </label>
+      </div>
+      <div class="actions">
+        <button class="btn btn-primary" type="submit">Save</button>
+        <a class="btn btn-ghost" href="{{ url_for('pass_types_list') }}">Cancel</a>
+      </div>
+    </form>
+  </section>
+{% endblock %}

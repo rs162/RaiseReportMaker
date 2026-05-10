@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Dashboard · DancePass{% endblock %}
+
+{% block content %}
+  <section class="hero">
+    <h1>Buenas! <span class="accent">Let's dance.</span></h1>
+    <p class="muted">Your Salsa &amp; Bachata studio at a glance.</p>
+  </section>
+
+  <section class="stats">
+    <div class="stat">
+      <div class="stat-num">{{ stats.students }}</div>
+      <div class="stat-label">Students</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">{{ stats.classes_week }}</div>
+      <div class="stat-label">Classes this week</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">{{ stats.active_passes }}</div>
+      <div class="stat-label">Active passes</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">{{ stats.checkins_today }}</div>
+      <div class="stat-label">Check-ins today</div>
+    </div>
+  </section>
+
+  <section class="card">
+    <header class="card-head">
+      <h2>Upcoming classes</h2>
+      <div class="actions">
+        <a class="btn btn-primary" href="{{ url_for('class_new') }}">+ Schedule class</a>
+        <a class="btn" href="{{ url_for('classes_list') }}">All classes</a>
+      </div>
+    </header>
+    {% if upcoming %}
+      <table class="table">
+        <thead>
+          <tr><th>When</th><th>Class</th><th>Style</th><th>Instructor</th><th>Attended</th><th></th></tr>
+        </thead>
+        <tbody>
+          {% for c in upcoming %}
+            <tr>
+              <td>{{ c.starts_at | dt }}</td>
+              <td><a href="{{ url_for('class_detail', session_id=c.id) }}">{{ c.name }}</a>
+                  {% if c.level %}<span class="chip">{{ c.level }}</span>{% endif %}</td>
+              <td><span class="chip chip-{{ c.style|lower }}">{{ c.style }}</span></td>
+              <td>{{ c.instructor or '—' }}</td>
+              <td>{{ c.attended }}{% if c.capacity %} / {{ c.capacity }}{% endif %}</td>
+              <td><a class="btn btn-sm" href="{{ url_for('class_detail', session_id=c.id) }}">Check-in</a></td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p class="muted">No upcoming classes yet. <a href="{{ url_for('class_new') }}">Schedule one</a>.</p>
+    {% endif %}
+  </section>
+{% endblock %}

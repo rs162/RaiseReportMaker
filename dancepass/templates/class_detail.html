@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}{{ cls.name }} · DancePass{% endblock %}
+
+{% block content %}
+  <section class="card">
+    <header class="card-head">
+      <div>
+        <h2>{{ cls.name }}
+          <span class="chip chip-{{ cls.style|lower }}">{{ cls.style }}</span>
+          {% if cls.level %}<span class="chip">{{ cls.level }}</span>{% endif %}
+        </h2>
+        <p class="muted">
+          {{ cls.starts_at | dt }} &middot; {{ cls.duration_min }} min
+          {% if cls.instructor %} &middot; with {{ cls.instructor }}{% endif %}
+          {% if cls.location %} &middot; {{ cls.location }}{% endif %}
+          {% if cls.capacity %} &middot; capacity {{ cls.capacity }}{% endif %}
+        </p>
+      </div>
+      <div class="actions">
+        <a class="btn" href="{{ url_for('class_edit', session_id=cls.id) }}">Edit</a>
+        <form method="post" action="{{ url_for('class_delete', session_id=cls.id) }}"
+              onsubmit="return confirm('Delete this class and all attendance?');">
+          <button class="btn btn-danger" type="submit">Delete</button>
+        </form>
+      </div>
+    </header>
+    {% if cls.notes %}<p class="notes">{{ cls.notes }}</p>{% endif %}
+  </section>
+
+  <section class="grid-2">
+    <div class="card">
+      <header class="card-head"><h3>Checked in ({{ attendees|length }})</h3></header>
+      {% if attendees %}
+        <table class="table compact">
+          <thead><tr><th>Student</th><th>Time</th><th>Pass used</th><th></th></tr></thead>
+          <tbody>
+            {% for a in attendees %}
+              <tr>
+                <td><a href="{{ url_for('student_detail', student_id=a.student_id) }}">{{ a.first_name }} {{ a.last_name }}</a></td>
+                <td>{{ a.checked_in_at | dt }}</td>
+                <td>{{ a.pass_type_name or '—' }}</td>
+                <td>
+                  <form method="post" action="{{ url_for('checkin_undo', attendance_id=a.id) }}"
+                        onsubmit="return confirm('Undo this check-in?');">
+                    <button class="btn btn-sm btn-ghost" type="submit">Undo</button>
+                  </form>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <p class="muted">Nobody checked in yet.</p>
+      {% endif %}
+    </div>
+
+    <div class="card">
+      <header class="card-head"><h3>Check in a student</h3></header>
+      {% if not_checked_in %}
+        <form method="post" action="{{ url_for('checkin', session_id=cls.id) }}" class="form">
+          <label>Student
+            <select name="student_id" required>
+              <option value="">— pick a student —</option>
+              {% for s in not_checked_in %}
+                <option value="{{ s.id }}">{{ s.last_name }}, {{ s.first_name }}</option>
+              {% endfor %}
+            </select>
+          </label>
+          <p class="muted small">A punch will be deducted from their oldest active pass automatically. Memberships count without deducting.</p>
+          <div class="actions">
+            <button class="btn btn-primary" type="submit">Check in</button>
+          </div>
+        </form>
+      {% else %}
+        <p class="muted">All students already checked in (or no students yet).</p>
+      {% endif %}
+    </div>
+  </section>
+{% endblock %}

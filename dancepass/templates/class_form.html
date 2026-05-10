@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}{{ action }} · DancePass{% endblock %}
+
+{% block content %}
+  <section class="card">
+    <header class="card-head"><h2>{{ action }}</h2></header>
+    <form method="post" class="form">
+      <label>Name *<input name="name" value="{{ cls.name or '' }}" required placeholder="Salsa On1 Beginner"></label>
+      <div class="row">
+        <label>Style
+          <select name="style">
+            {% set styles = ['Salsa','Bachata','Cha-Cha','Kizomba','Other'] %}
+            {% for s in styles %}
+              <option value="{{ s }}" {% if (cls.style or 'Salsa') == s %}selected{% endif %}>{{ s }}</option>
+            {% endfor %}
+          </select>
+        </label>
+        <label>Level
+          <select name="level">
+            <option value="">—</option>
+            {% for lvl in ['Beginner','Improver','Intermediate','Advanced','All Levels'] %}
+              <option value="{{ lvl }}" {% if cls.level == lvl %}selected{% endif %}>{{ lvl }}</option>
+            {% endfor %}
+          </select>
+        </label>
+        <label>Instructor<input name="instructor" value="{{ cls.instructor or '' }}"></label>
+      </div>
+      <div class="row">
+        <label>Starts at *<input type="datetime-local" name="starts_at" value="{{ cls.starts_at or '' }}" required></label>
+        <label>Duration (min)<input type="number" name="duration_min" min="15" max="240" value="{{ cls.duration_min or 60 }}"></label>
+        <label>Capacity<input type="number" name="capacity" min="1" value="{{ cls.capacity or '' }}" placeholder="unlimited"></label>
+      </div>
+      <label>Location<input name="location" value="{{ cls.location or '' }}" placeholder="Studio A"></label>
+      <label>Notes<textarea name="notes" rows="3">{{ cls.notes or '' }}</textarea></label>
+      <div class="actions">
+        <button class="btn btn-primary" type="submit">Save</button>
+        <a class="btn btn-ghost" href="{{ url_for('classes_list') }}">Cancel</a>
+      </div>
+    </form>
+  </section>
+{% endblock %}

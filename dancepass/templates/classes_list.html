@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Classes · DancePass{% endblock %}
+
+{% block content %}
+  <section class="card">
+    <header class="card-head">
+      <h2>Classes</h2>
+      <div class="actions">
+        <div class="tabs">
+          <a class="tab {% if scope != 'past' %}active{% endif %}" href="{{ url_for('classes_list', scope='upcoming') }}">Upcoming</a>
+          <a class="tab {% if scope == 'past' %}active{% endif %}" href="{{ url_for('classes_list', scope='past') }}">Past</a>
+        </div>
+        <a class="btn btn-primary" href="{{ url_for('class_new') }}">+ Schedule class</a>
+      </div>
+    </header>
+
+    {% if classes %}
+      <table class="table">
+        <thead>
+          <tr><th>When</th><th>Class</th><th>Style</th><th>Level</th><th>Instructor</th><th>Attended</th></tr>
+        </thead>
+        <tbody>
+          {% for c in classes %}
+            <tr>
+              <td>{{ c.starts_at | dt }}</td>
+              <td><a href="{{ url_for('class_detail', session_id=c.id) }}">{{ c.name }}</a></td>
+              <td><span class="chip chip-{{ c.style|lower }}">{{ c.style }}</span></td>
+              <td>{{ c.level or '—' }}</td>
+              <td>{{ c.instructor or '—' }}</td>
+              <td>{{ c.attended }}{% if c.capacity %} / {{ c.capacity }}{% endif %}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p class="muted">No classes here yet.</p>
+    {% endif %}
+  </section>
+{% endblock %}

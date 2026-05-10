@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block title %}{{ student.first_name }} {{ student.last_name }} · DancePass{% endblock %}
+
+{% block content %}
+  <section class="card">
+    <header class="card-head">
+      <div>
+        <h2>{{ student.first_name }} {{ student.last_name }}</h2>
+        <p class="muted">
+          {% if student.email %}<a href="mailto:{{ student.email }}">{{ student.email }}</a> &middot; {% endif %}
+          {% if student.phone %}{{ student.phone }} &middot; {% endif %}
+          joined {{ student.created_at | d }}
+        </p>
+      </div>
+      <div class="actions">
+        <a class="btn" href="{{ url_for('student_edit', student_id=student.id) }}">Edit</a>
+        <form method="post" action="{{ url_for('student_delete', student_id=student.id) }}"
+              onsubmit="return confirm('Delete this student? Their attendance and passes go too.');">
+          <button class="btn btn-danger" type="submit">Delete</button>
+        </form>
+      </div>
+    </header>
+    {% if student.notes %}<p class="notes">{{ student.notes }}</p>{% endif %}
+  </section>
+
+  <section class="grid-2">
+    <div class="card">
+      <header class="card-head"><h3>Passes</h3></header>
+      {% if passes %}
+        <table class="table compact">
+          <thead><tr><th>Pass</th><th>Status</th><th>Remaining</th><th>Expires</th><th></th></tr></thead>
+          <tbody>
+            {% for p in passes %}
+              {% set status = pass_status(p) %}
+              <tr>
+                <td>{{ p.pass_type_name }}<br><span class="muted small">bought {{ p.purchased_at | d }}</span></td>
+                <td><span class="chip chip-status-{{ status|lower|replace(' ','-') }}">{{ status }}</span></td>
+                <td>{{ pass_remaining(p) }}</td>
+                <td>{{ p.expires_at | d if p.expires_at else 'Never' }}</td>
+                <td>
+                  <form method="post" action="{{ url_for('sold_pass_delete', pass_id=p.id) }}"
+                        onsubmit="return confirm('Delete this pass?');">
+                    <button class="btn btn-sm btn-danger" type="submit">Delete</button>
+                  </form>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <p class="muted">No passes yet.</p>
+      {% endif %}
+
+      <hr>
+      <h4>Sell a pass</h4>
+      <form method="post" action="{{ url_for('sell_pass', student_id=student.id) }}" class="form">
+        <div class="row">
+          <label>Pass type
+            <select name="pass_type_id" required>
+              <option value="">— pick one —</option>
+              {% for pt in pass_types %}
+                <option value="{{ pt.id }}">
+                  {{ pt.name }} ({{ pt.price_cents | money }}{% if pt.kind == 'punch' %}, {{ pt.punches }} classes{% endif %}{% if pt.valid_days %}, {{ pt.valid_days }}d{% endif %})
+                </option>
+              {% endfor %}
+            </select>
+          </label>
+          <label>Note<input name="note" placeholder="optional"></label>
+        </div>
+        <div class="actions">
+          <button class="btn btn-primary" type="submit">Sell pass</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="card">
+      <header class="card-head"><h3>Recent attendance</h3></header>
+      {% if history %}
+        <table class="table compact">
+          <thead><tr><th>Class</th><th>Checked in</th><th>Pass</th></tr></thead>
+          <tbody>
+            {% for a in history %}
+              <tr>
+                <td>{{ a.class_name }}<br><span class="muted small">{{ a.class_starts_at | dt }}</span></td>
+                <td>{{ a.checked_in_at | dt }}</td>
+                <td>{{ a.pass_type_name or '—' }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <p class="muted">No classes attended yet.</p>
+      {% endif %}
+    </div>
+  </section>
+{% endblock %}
