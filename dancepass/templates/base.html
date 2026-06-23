@@ -3,15 +3,21 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>{% block title %}DancePass{% endblock %}</title>
+  <title>{% block title %}Baila Caliente Dance Studios{% endblock %}</title>
+  <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='logo.svg') }}" />
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
 </head>
 <body>
   <header class="topbar">
     <a class="brand" href="{{ url_for('dashboard') }}">
-      <span class="brand-mark">D</span>
-      <span class="brand-name">DancePass</span>
-      <span class="brand-tag">Salsa &middot; Bachata Studio</span>
+      <img class="brand-logo"
+           src="{{ url_for('static', filename='logo.png') }}"
+           onerror="this.onerror=null;this.src='{{ url_for('static', filename='logo.svg') }}';"
+           alt="Baila Caliente Dance Studios" />
+      <span class="brand-text">
+        <span class="brand-name">Baila Caliente</span>
+        <span class="brand-tag">Passion &middot; Soul &middot; Desire</span>
+      </span>
     </a>
     <nav class="nav">
       <a href="{{ url_for('dashboard') }}">Dashboard</a>
@@ -36,7 +42,7 @@
   </main>
 
   <footer class="foot">
-    <span>DancePass &copy; {{ now.year }} &middot; built for Salsa &amp; Bachata classes</span>
+    <span>Baila Caliente Dance Studios &copy; {{ now.year }} &middot; Salsa &amp; Bachata</span>
   </footer>
 </body>
 </html>

@@ -1,4 +1,4 @@
-"""DancePass: a small Punchpass-style app for a Salsa/Bachata studio."""
+"""Baila Caliente: a Punchpass-style app for Baila Caliente Dance Studios."""
 
 from __future__ import annotations
 
@@ -23,7 +23,9 @@ DB_PATH = BASE_DIR / "dancepass.db"
 SCHEMA_PATH = BASE_DIR / "schema.sql"
 
 app = Flask(__name__)
-app.config["SECRET_KEY"] = os.environ.get("DANCEPASS_SECRET", "change-me-in-prod")
+app.config["SECRET_KEY"] = os.environ.get(
+    "BAILA_SECRET", os.environ.get("DANCEPASS_SECRET", "change-me-in-prod")
+)
 
 
 # ---------------------------------------------------------------------------
@@ -58,15 +60,14 @@ def init_db() -> None:
 
 
 def _seed(conn: sqlite3.Connection) -> None:
-    """Seed a few sensible defaults so the app is usable on first run."""
+    """Seed Baila Caliente's current packages. More can be added later."""
     conn.executemany(
         "INSERT INTO pass_types (name, kind, punches, valid_days, price_cents) "
         "VALUES (?, ?, ?, ?, ?)",
         [
-            ("Drop-in (1 class)", "punch", 1, 60, 2000),
-            ("5-Class Pass", "punch", 5, 90, 9000),
-            ("10-Class Pass", "punch", 10, 180, 16000),
-            ("Monthly Unlimited", "membership", None, 30, 12000),
+            # $12 single class, $20 for two classes the same night.
+            ("Single Class", "punch", 1, 60, 1200),
+            ("Two Classes (Same Night)", "punch", 2, 1, 2000),
         ],
     )
 

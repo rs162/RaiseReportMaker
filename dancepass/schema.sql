@@ -1,4 +1,4 @@
--- DancePass: Punchpass-style class management for a Salsa/Bachata studio.
+-- Baila Caliente: class management for Baila Caliente Dance Studios.
 
 PRAGMA foreign_keys = ON;
 
