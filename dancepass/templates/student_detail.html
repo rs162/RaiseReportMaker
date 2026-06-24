@@ -21,6 +21,41 @@
       </div>
     </header>
     {% if student.notes %}<p class="notes">{{ student.notes }}</p>{% endif %}
+
+    {% if student.waiver_signed_at %}
+      <div class="waiver waiver-signed">
+        <span class="chip chip-status-active">Waiver signed</span>
+        Signed as <strong>{{ student.waiver_signature }}</strong> on {{ student.waiver_signed_at | dt }}.
+        <form method="post" action="{{ url_for('student_waiver_clear', student_id=student.id) }}"
+              onsubmit="return confirm('Clear this student\'s waiver? They will need to re-sign before checking in.');">
+          <button class="btn btn-sm btn-ghost" type="submit">Clear waiver</button>
+        </form>
+      </div>
+    {% else %}
+      <div class="waiver waiver-unsigned">
+        <h4>Liability waiver — required before check-in</h4>
+        <p class="muted small">
+          I understand that participation in dance classes and social events at
+          Baila Caliente Dance Studios involves physical activity and inherent
+          risk of injury. I voluntarily assume all such risks and release
+          Baila Caliente Dance Studios, its instructors, and staff from any
+          and all liability for injury, loss, or damage arising from my
+          participation. By typing my full name below I acknowledge that I have
+          read and agree to this waiver.
+        </p>
+        <form method="post" action="{{ url_for('student_waiver_sign', student_id=student.id) }}" class="form">
+          <div class="row">
+            <label>Type full name to sign *
+              <input name="signature" required
+                     placeholder="{{ student.first_name }} {{ student.last_name }}">
+            </label>
+          </div>
+          <div class="actions">
+            <button class="btn btn-primary" type="submit">Sign waiver</button>
+          </div>
+        </form>
+      </div>
+    {% endif %}
   </section>
 
   <section class="grid-2">

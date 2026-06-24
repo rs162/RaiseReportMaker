@@ -53,21 +53,38 @@ def init_db() -> None:
     conn = sqlite3.connect(DB_PATH)
     with open(SCHEMA_PATH, "r", encoding="utf-8") as f:
         conn.executescript(f.read())
+    _migrate(conn)
     if fresh:
         _seed(conn)
     conn.commit()
     conn.close()
 
 
+def _migrate(conn: sqlite3.Connection) -> None:
+    """In-place column adds for older DBs predating waiver + session kind."""
+    def cols(table: str) -> set[str]:
+        return {r[1] for r in conn.execute(f"PRAGMA table_info({table})")}
+
+    student_cols = cols("students")
+    if "waiver_signed_at" not in student_cols:
+        conn.execute("ALTER TABLE students ADD COLUMN waiver_signed_at TEXT")
+    if "waiver_signature" not in student_cols:
+        conn.execute("ALTER TABLE students ADD COLUMN waiver_signature TEXT")
+
+    if "kind" not in cols("class_sessions"):
+        conn.execute(
+            "ALTER TABLE class_sessions ADD COLUMN kind TEXT NOT NULL DEFAULT 'class'"
+        )
+
+
 def _seed(conn: sqlite3.Connection) -> None:
-    """Seed Baila Caliente's current packages. More can be added later."""
+    """Seed Baila Caliente's offerings: drop-in classes and the monthly social."""
     conn.executemany(
         "INSERT INTO pass_types (name, kind, punches, valid_days, price_cents) "
         "VALUES (?, ?, ?, ?, ?)",
         [
-            # $12 single class, $20 for two classes the same night.
-            ("Single Class", "punch", 1, 60, 1200),
-            ("Two Classes (Same Night)", "punch", 2, 1, 2000),
+            ("Drop-In Class", "punch", 1, None, 1200),
+            ("Monthly Social Entry", "punch", 1, None, 1500),
         ],
     )
 
@@ -316,6 +333,37 @@ def student_edit(student_id):
     return render_template("student_form.html", student=student, action="Edit Student")
 
 
+@app.route("/students/<int:student_id>/waiver/sign", methods=["POST"])
+def student_waiver_sign(student_id):
+    db = get_db()
+    student = db.execute("SELECT * FROM students WHERE id = ?", (student_id,)).fetchone()
+    if not student:
+        abort(404)
+    signature = request.form.get("signature", "").strip()
+    if not signature:
+        flash("Type your full name to sign the waiver.", "error")
+        return redirect(url_for("student_detail", student_id=student_id))
+    db.execute(
+        "UPDATE students SET waiver_signed_at = ?, waiver_signature = ? WHERE id = ?",
+        (datetime.now().isoformat(timespec="seconds"), signature, student_id),
+    )
+    db.commit()
+    flash("Waiver signed. Welcome to Baila Caliente.", "ok")
+    return redirect(url_for("student_detail", student_id=student_id))
+
+
+@app.route("/students/<int:student_id>/waiver/clear", methods=["POST"])
+def student_waiver_clear(student_id):
+    db = get_db()
+    db.execute(
+        "UPDATE students SET waiver_signed_at = NULL, waiver_signature = NULL WHERE id = ?",
+        (student_id,),
+    )
+    db.commit()
+    flash("Waiver cleared.", "ok")
+    return redirect(url_for("student_detail", student_id=student_id))
+
+
 @app.route("/students/<int:student_id>/delete", methods=["POST"])
 def student_delete(student_id):
     db = get_db()
@@ -365,15 +413,17 @@ def class_new():
             flash("Class name and start time are required.", "error")
             return render_template("class_form.html", cls=f, action="New Class")
         db = get_db()
+        kind = "social" if f.get("kind") == "social" else "class"
         cur = db.execute(
             """
             INSERT INTO class_sessions
-                (name, style, level, instructor, starts_at, duration_min,
+                (name, kind, style, level, instructor, starts_at, duration_min,
                  capacity, location, notes)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 f["name"].strip(),
+                kind,
                 f.get("style", "Salsa").strip() or "Salsa",
                 f.get("level", "").strip() or None,
                 f.get("instructor", "").strip() or None,
@@ -385,7 +435,7 @@ def class_new():
             ),
         )
         db.commit()
-        flash("Class scheduled.", "ok")
+        flash("Scheduled.", "ok")
         return redirect(url_for("class_detail", session_id=cur.lastrowid))
     return render_template("class_form.html", cls={}, action="New Class")
 
@@ -437,16 +487,18 @@ def class_edit(session_id):
         abort(404)
     if request.method == "POST":
         f = request.form
+        kind = "social" if f.get("kind") == "social" else "class"
         db.execute(
             """
             UPDATE class_sessions
-               SET name = ?, style = ?, level = ?, instructor = ?,
+               SET name = ?, kind = ?, style = ?, level = ?, instructor = ?,
                    starts_at = ?, duration_min = ?, capacity = ?,
                    location = ?, notes = ?
              WHERE id = ?
             """,
             (
                 f["name"].strip(),
+                kind,
                 f.get("style", "Salsa").strip() or "Salsa",
                 f.get("level", "").strip() or None,
                 f.get("instructor", "").strip() or None,
@@ -459,7 +511,7 @@ def class_edit(session_id):
             ),
         )
         db.commit()
-        flash("Class updated.", "ok")
+        flash("Updated.", "ok")
         return redirect(url_for("class_detail", session_id=session_id))
     return render_template("class_form.html", cls=cls, action="Edit Class")
 
@@ -490,6 +542,21 @@ def checkin(session_id):
     if not student_id:
         flash("Pick a student to check in.", "error")
         return redirect(url_for("class_detail", session_id=session_id))
+
+    student = db.execute(
+        "SELECT id, first_name, last_name, waiver_signed_at FROM students WHERE id = ?",
+        (student_id,),
+    ).fetchone()
+    if not student:
+        flash("Student not found.", "error")
+        return redirect(url_for("class_detail", session_id=session_id))
+    if not student["waiver_signed_at"]:
+        flash(
+            f"{student['first_name']} {student['last_name']} hasn't signed the "
+            "waiver yet. Sign it on their profile before checking in.",
+            "error",
+        )
+        return redirect(url_for("student_detail", student_id=student_id))
 
     existing = db.execute(
         "SELECT id FROM attendance WHERE student_id = ? AND session_id = ?",

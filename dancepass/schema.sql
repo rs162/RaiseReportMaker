@@ -3,17 +3,20 @@
 PRAGMA foreign_keys = ON;
 
 CREATE TABLE IF NOT EXISTS students (
-    id            INTEGER PRIMARY KEY AUTOINCREMENT,
-    first_name    TEXT NOT NULL,
-    last_name     TEXT NOT NULL,
-    email         TEXT,
-    phone         TEXT,
-    notes         TEXT,
-    created_at    TEXT NOT NULL DEFAULT (datetime('now'))
+    id                INTEGER PRIMARY KEY AUTOINCREMENT,
+    first_name        TEXT NOT NULL,
+    last_name         TEXT NOT NULL,
+    email             TEXT,
+    phone             TEXT,
+    notes             TEXT,
+    waiver_signed_at  TEXT,
+    waiver_signature  TEXT,
+    created_at        TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
--- A pass_type is a sellable product: a punch card (e.g. 10 classes)
--- or a membership (unlimited within a date range, in days).
+-- A pass_type is a sellable product. Baila Caliente only sells drop-ins
+-- (a single class) and entry to the monthly social, but the schema also
+-- supports multi-class punch cards and memberships for future use.
 CREATE TABLE IF NOT EXISTS pass_types (
     id            INTEGER PRIMARY KEY AUTOINCREMENT,
     name          TEXT NOT NULL,
@@ -27,10 +30,12 @@ CREATE TABLE IF NOT EXISTS pass_types (
     created_at    TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
--- A class_session is a scheduled instance of a class students can attend.
+-- A class_session is a scheduled class or social students can attend.
 CREATE TABLE IF NOT EXISTS class_sessions (
     id            INTEGER PRIMARY KEY AUTOINCREMENT,
     name          TEXT NOT NULL,                 -- e.g. "Salsa On1 Beginner"
+    kind          TEXT NOT NULL DEFAULT 'class'  -- 'class' or 'social'
+                  CHECK (kind IN ('class', 'social')),
     style         TEXT NOT NULL DEFAULT 'Salsa', -- Salsa, Bachata, etc.
     level         TEXT,                          -- Beginner, Intermediate, Advanced
     instructor    TEXT,

@@ -7,6 +7,13 @@
     <form method="post" class="form">
       <label>Name *<input name="name" value="{{ cls.name or '' }}" required placeholder="Salsa On1 Beginner"></label>
       <div class="row">
+        <label>Kind
+          <select name="kind">
+            {% set current_kind = cls.kind or 'class' %}
+            <option value="class"  {% if current_kind == 'class'  %}selected{% endif %}>Class</option>
+            <option value="social" {% if current_kind == 'social' %}selected{% endif %}>Social (monthly)</option>
+          </select>
+        </label>
         <label>Style
           <select name="style">
             {% set styles = ['Salsa','Bachata','Cha-Cha','Kizomba','Other'] %}

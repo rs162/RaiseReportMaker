@@ -17,13 +17,20 @@
 
     {% if students %}
       <table class="table">
-        <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Joined</th></tr></thead>
+        <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Waiver</th><th>Joined</th></tr></thead>
         <tbody>
           {% for s in students %}
             <tr>
               <td><a href="{{ url_for('student_detail', student_id=s.id) }}">{{ s.first_name }} {{ s.last_name }}</a></td>
               <td>{{ s.email or '—' }}</td>
               <td>{{ s.phone or '—' }}</td>
+              <td>
+                {% if s.waiver_signed_at %}
+                  <span class="chip chip-status-active">Signed</span>
+                {% else %}
+                  <span class="chip chip-status-expired">Unsigned</span>
+                {% endif %}
+              </td>
               <td>{{ s.created_at | d }}</td>
             </tr>
           {% endfor %}

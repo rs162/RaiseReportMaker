@@ -23,7 +23,10 @@
           {% for c in classes %}
             <tr>
               <td>{{ c.starts_at | dt }}</td>
-              <td><a href="{{ url_for('class_detail', session_id=c.id) }}">{{ c.name }}</a></td>
+              <td>
+                <a href="{{ url_for('class_detail', session_id=c.id) }}">{{ c.name }}</a>
+                {% if c.kind == 'social' %}<span class="chip chip-social">Social</span>{% endif %}
+              </td>
               <td><span class="chip chip-{{ c.style|lower }}">{{ c.style }}</span></td>
               <td>{{ c.level or '—' }}</td>
               <td>{{ c.instructor or '—' }}</td>

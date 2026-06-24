@@ -1,26 +1,34 @@
 # Baila Caliente Dance Studios — Class Manager
 
 A small, self-hosted Punchpass-style app for **Baila Caliente Dance Studios**
-(Passion · Soul · Desire). Schedule Salsa & Bachata classes, sell punch cards
-and memberships, and check students in at the door.
+(Passion · Soul · Desire). Schedule Salsa & Bachata drop-in classes and the
+monthly social, sign students' liability waivers, sell drop-in punches, and
+check people in at the door.
 
 ## Features
 
-- **Students** — names, contact info, notes, attendance history.
-- **Classes** — schedule sessions with style (Salsa / Bachata / etc.), level, instructor, capacity, location.
-- **Passes** — two kinds:
-  - **Punch cards** (e.g. Single Class, Two-Class Night) with optional expiry.
-  - **Memberships** (e.g. Monthly Unlimited) with a validity window.
-- **Sales** — sell any active pass type to a student in one click.
-- **Check-in** — one-click check-in. The app auto-picks the student's oldest active pass
-  (punch cards before memberships) and deducts a punch. Undo refunds the punch.
+- **Students** — names, contact info, notes, attendance history, **liability waiver** status.
+- **Waivers** — students sign a typed-name liability waiver from their profile.
+  Check-in is blocked until the waiver is on file.
+- **Classes & Socials** — schedule sessions as either a regular **Class** or
+  the monthly **Social**, with style (Salsa / Bachata / etc.), level,
+  instructor, capacity, location.
+- **Drop-in passes** — Baila Caliente runs on drop-ins, not memberships:
+  - **Drop-In Class — $12** (one class)
+  - **Monthly Social Entry — $15** (one social)
+- **Sales** — sell a pass to a student in one click.
+- **Check-in** — one-click check-in. The app auto-deducts a punch from the
+  student's oldest active pass; **undo** refunds it. Unsigned-waiver students
+  are sent back to their profile to sign.
 - **Dashboard** — students, classes this week, active passes, today's check-ins.
 
-Seeded on first run with Baila Caliente's current packages:
-- **Single Class — $12** (1 punch, 60-day expiry)
-- **Two Classes, Same Night — $20** (2 punches, 1-day expiry to encourage same-night use)
+Seeded on first run with Baila Caliente's offerings:
+- **Drop-In Class — $12**
+- **Monthly Social Entry — $15**
 
-Add more packages on the Passes page as you launch them.
+Add more packages on the Passes page as you launch them. The schema still
+supports multi-class punch cards and date-bounded memberships if you ever want
+them; the seed just keeps things lean for now.
 
 ## Run it
 

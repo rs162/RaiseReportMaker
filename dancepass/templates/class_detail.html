@@ -6,6 +6,7 @@
     <header class="card-head">
       <div>
         <h2>{{ cls.name }}
+          {% if cls.kind == 'social' %}<span class="chip chip-social">Social</span>{% endif %}
           <span class="chip chip-{{ cls.style|lower }}">{{ cls.style }}</span>
           {% if cls.level %}<span class="chip">{{ cls.level }}</span>{% endif %}
         </h2>
@@ -66,7 +67,7 @@
               {% endfor %}
             </select>
           </label>
-          <p class="muted small">A punch will be deducted from their oldest active pass automatically. Memberships count without deducting.</p>
+          <p class="muted small">A drop-in punch will be deducted from their oldest active pass automatically. Students must have a signed waiver to check in.</p>
           <div class="actions">
             <button class="btn btn-primary" type="submit">Check in</button>
           </div>

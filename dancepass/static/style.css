@@ -228,6 +228,26 @@ tr.dim { opacity: 0.5; }
 .chip-status-active   { background: rgba(27,135,59,0.12); color: var(--ok); }
 .chip-status-expired  { background: rgba(179,38,30,0.10); color: var(--danger); }
 .chip-status-used-up  { background: rgba(17,17,17,0.08); color: var(--muted); }
+.chip-social {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  color: #fff; border: 1px solid var(--primary-dark);
+  text-transform: uppercase; letter-spacing: 0.06em; font-size: 11px;
+}
+
+/* Waiver block ----------------------------------------------------------- */
+.waiver {
+  margin-top: 14px;
+  padding: 14px 16px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+}
+.waiver h4 { margin: 0 0 6px 0; font-family: Georgia, "Times New Roman", serif; }
+.waiver-signed {
+  background: #ecfaef; border-color: #c8e6c9; color: #135b25;
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+}
+.waiver-signed form { margin: 0 0 0 auto; }
+.waiver-unsigned { background: #fff6df; border-color: #f5dca0; }
 
 /* Flashes ---------------------------------------------------------------- */
 .flashes { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
